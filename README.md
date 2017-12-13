@@ -1,5 +1,7 @@
 # newStore
 
+* computer numerical control linear table
+
 basic lenth is 27cm
 
 must ordering 
