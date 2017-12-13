@@ -1,6 +1,4 @@
-# newStore
-
-* computer numerical control linear table
+# computer numerical control linear table
 
 basic lenth is 27cm
 
