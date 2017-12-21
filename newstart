@@ -1,0 +1,52 @@
+/*
+ * every joints are workiing with digital switch
+ * when before start working, checking all digital switchs to initialize
+ * stepping position. 
+ * must install 3 switch. horizontal moving, tilting moving, rotation moving
+ */
+
+/*
+ * stepping must setting same direction to initialize
+ */
+
+ /*
+  * Serial on -> setting same direction stepper
+  * while all switch value is high working with same spped
+  */
+enum {
+  sumstep = 3
+};
+
+struct endSwitch {
+  const int endPin[3] = {1, 2, 3};
+  unsigned int pinStatus[3]; 
+};
+
+struct stepcount {
+  unsigned int steps[sumstep];
+};
+
+struct endSwitch endSwitch;
+struct stepcount stepcount[sumstep];
+
+char ch = "a";
+
+int i;
+
+void setup() {
+  Serial.begin (19200);
+  for (i = 0; i < 3; i++) {
+    pinMode(endSwitch.endPin[i], INPUT);
+    endSwitch.pinStatus[i] = 0;
+  }
+}
+
+void loop() {
+  if (Serial.available()) {
+    ch = Serial.read();
+    if (ch >= 1) {
+      Serial.print ("enter");
+      Serial.println (ch);
+    } 
+  }
+}
