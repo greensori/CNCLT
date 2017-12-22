@@ -14,6 +14,7 @@ class cnclt
     cnclt(int a);
     int initialize();
     int endSwitchStatus(int d, int pinno);
+    void endSwitchChecker(int DIR, int STEP, int endswitch);
 };
 
 #endif
