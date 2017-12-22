@@ -1,3 +1,7 @@
+#include "cnclt.h"
+
+#include <Servo.h>
+
 /*
  * every joints are workiing with digital switch
  * when before start working, checking all digital switchs to initialize
@@ -14,39 +18,58 @@
   * while all switch value is high working with same spped
   */
 enum {
-  sumstep = 3
+  sumstep = 3 //horizont, tilt, rotation
 };
 
 struct endSwitch {
-  const int endPin[3] = {1, 2, 3};
-  unsigned int pinStatus[3]; 
 };
 
-struct stepcount {
-  unsigned int steps[sumstep];
+struct pts {
+  int stepCount; //how many steps are working
+  unsigned int pinStatus; // ( 0 == is idle status)
 };
 
 struct endSwitch endSwitch;
-struct stepcount stepcount[sumstep];
+struct pts pts[sumstep];
+
+cnclt mycnclt(100);
+
+const int endPin[sumstep] = {43, 44, 45};
+const int ENA[sumstep] = {4, 5, 6};
+const int DIR[sumstep] = {7, 8, 9};
+const int STEP[sumstep] = {10, 11, 12};
+
+int endPinCount;
 
 char ch = "a";
 
 int i;
+int count;
 
 void setup() {
   Serial.begin (19200);
   for (i = 0; i < 3; i++) {
-    pinMode(endSwitch.endPin[i], INPUT);
-    endSwitch.pinStatus[i] = 0;
+    pinMode(endPin[i], INPUT);
+    pts[i].pinStatus = 0;
   }
 }
 
+
 void loop() {
+  count = mycnclt.endSwitchStatus(100, endPin[1]);
+  Serial.println (count);
   if (Serial.available()) {
     ch = Serial.read();
     if (ch >= 1) {
       Serial.print ("enter");
       Serial.println (ch);
-    } 
+    }
+  }
+}
+
+int SwitchCount() {
+  for (i = 0; i < sumstep; i++) {
+    endPinCount = digitalRead(endPin[i]);
+    return endPinCount;
   }
 }
