@@ -97,7 +97,13 @@ int SwitchCount() {
 
 int stepWorker(int remainWorkCount) {
   for (i = 0; i < sumstep; i++) {
-    
+    if (pts[i].pinWorkCount > 0) {
+      pts[i].pinWorkCount = mycnclt.stepWorkPosition(endPin[i], STEP[i], pts[i].pinWorkCount);
+    } else if (pts[i].pinWorkCount == 0) {
+      Serial.print ("step");
+      Serial.print (i);
+      Serial.println ("_resting");
+    }
   }
   return (remainWorkCount - 1);
 }
