@@ -33,7 +33,7 @@ struct endSwitch {
 
 struct pts {
   int stepCount; //how many steps are working
-  unsigned int pinStatus; // ( 0 == is idle status)
+  unsigned int pinWorkCount; // ( 0 == is no working)
 };
 
 struct endSwitch endSwitch;
@@ -41,9 +41,6 @@ struct pts pts[sumstep];
 
 cnclt mycnclt(100);
 
-/*
- * 
- */
 const int endPin[sumEndSwitch] = {43, 44, 45};
 const int ENA[sumstep] = {4, 5, 6};
 const int DIR[sumstep] = {7, 8, 9};
@@ -51,7 +48,7 @@ const int STEP[sumstep] = {10, 11, 12};
 
 int endPinCount;
 
-char ch = "a";
+char ch;
 
 int i;
 int count;
@@ -60,7 +57,7 @@ void setup() {
   Serial.begin (19200);
   for (i = 0; i < 3; i++) {
     pinMode(endPin[i], INPUT);
-    pts[i].pinStatus = 0;
+    pts[i].pinWorkCount = 0;
   }
 }
 
@@ -74,9 +71,6 @@ void loop() {
   if (Serial.available()) {
     ch = Serial.read();
     if (ch >= Endchar) {
-      for (i = 0; i < sumstep; i++) {
-        mycnclt.endSwitchChecker(1, 2, 3);      
-      }
     }
   }
 }
@@ -101,9 +95,16 @@ int SwitchCount() {
 }
 */
 
-void homePosition() {
+int stepWorker(int remainWorkCount) {
   for (i = 0; i < sumstep; i++) {
-    mycnclt.endSwitchChecker(DIR[i], STEP[i], endPin[i]);
+    
   }
+  return (remainWorkCount - 1);
 }
 
+
+void homePosition() {
+  for (i = 0; i < sumstep; i++) {
+    pts[i].stepCount = mycnclt.endSwitchChecker(DIR[i], STEP[i], endPin[i]);
+  }
+}
