@@ -41,6 +41,9 @@ struct pts pts[sumstep];
 
 cnclt mycnclt(100);
 
+/*
+ * 
+ */
 const int endPin[sumEndSwitch] = {43, 44, 45};
 const int ENA[sumstep] = {4, 5, 6};
 const int DIR[sumstep] = {7, 8, 9};
@@ -64,6 +67,10 @@ void setup() {
 
 void loop() {
   //count = mycnclt.endSwitchStatus(100, endPin[1]);
+  /*
+   * for (i = 0; i < sumstep; i++) {
+   * mycnclt.endSwitchChecker(step, dir, endpin[i])
+   */
   if (Serial.available()) {
     ch = Serial.read();
     if (ch >= Endchar) {
@@ -93,4 +100,10 @@ int SwitchCount() {
   return endPinCount;
 }
 */
+
+void homePosition() {
+  for (i = 0; i < sumstep; i++) {
+    mycnclt.endSwitchChecker(DIR[i], STEP[i], endPin[i]);
+  }
+}
 
