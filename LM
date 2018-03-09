@@ -1,0 +1,46 @@
+/*
+ * for using in linear robot arm
+ * optical switch is installed 4
+ */
+
+#include "LM.h"
+
+LM LM;
+
+enum opticalSW{
+  Sa = 5,
+  Sb,
+  Sc,
+  Sd
+};
+
+
+int lastActivatedSW; //this conclusion directon of steppers
+
+
+int i;
+
+char inChar;
+
+void setup() {
+  Serial.begin(115200);
+  LM.setStep(11, 12, 13);
+  for (i = 1; i <= 5; i++) {
+    pinMode(opticalSW(i), INPUT);
+  }
+}
+
+/*
+ * upper arm working while digitalPIn is high position
+ * operate odd status optical and step
+ */
+
+void loop() {
+  if (Serial.available()) {
+    inChar = Serial.read();
+    Serial.println (inChar);
+  } else {
+    //Serial.println (digitalRead(opticalSW(1)));
+  }
+}
+
