@@ -1,0 +1,121 @@
+/*
+ * for using in linear robot arm
+ * optical switch is installed 4
+ */
+
+#define stepAxis 2
+
+#define stepNumber 3
+
+#define initPwm 1500
+
+#define limitPwm 800
+
+#include "LM.h"
+
+#include <Servo.h>
+
+LM LM;
+
+Servo myservo;
+
+const uint8_t stepNo[3] = {11, 12, 13};
+const uint8_t stepDir[3] = {14, 15, 16};
+const uint8_t stepEna[3] = {17, 18, 19};
+
+const uint8_t opticalSw[4] = {34, 35, 36, 37};
+
+//xaxis and roll movement
+struct stepControl{
+  uint16_t pt[stepAxis];
+  uint16_t pwm[stepAxis];
+};
+
+stepControl stepCtl;
+
+//0 is last activated switch value and 1 is present activated one
+uint8_t ActivatedSW[2]; //this conclusion directon of steppers
+
+
+uint8_t currentDevice;
+
+int i;
+
+char inChar;
+
+int temp = 9;
+
+void setup() {
+  Serial.begin(115200);
+  LM.setStep(11, 12, 13);
+  myservo.attach(35);
+  //Optical pin setting
+  for (i = 0; i < 4; i++) {
+    pinMode(opticalSw[i], INPUT);
+  }
+  //step Setting
+  for (i = 0; i < 3; i++) {
+    pinMode(stepEna[i], OUTPUT);
+    digitalWrite(stepEna[i], LOW);
+    pinMode(stepNo[i], OUTPUT);
+    pinMode(stepDir[i], OUTPUT);
+  }
+}
+
+/*
+ * upper arm working while digitalPIn is high position
+ * operate odd status optical and step
+ */
+
+void loop() {
+  if (Serial.available()) {
+    inChar = Serial.read();
+    Serial.println (inChar);
+  } else {
+    delay(1000);
+    Serial.println (stepNo[1]);
+    stopWorking(&temp);
+    Serial.println (temp);
+    //Serial.println (digitalRead(opticalSW(1)));
+  }
+}
+
+
+void initWorker(int current) {
+  
+}
+
+void worker() {
+  
+}
+/*
+ * some case x axis moving specific potition
+ * that position is same as opticalSw pt
+ * direction is changed when serial input is available
+ */
+void myMovemnet() {
+  if (xAxisMovement(3) == 1) {
+    int temp = xAxisMovement(3);
+  } else if (xAxisMovement(3) == 0) {
+    // end position signals to working end
+  }
+}
+
+int xAxisOpticalStat() {
+  
+}
+
+int xAxisMovement(int stepPt){
+  digitalWrite(stepNo[0], HIGH);
+  digitalWrite(stepNo[1], HIGH);
+  delayMicroseconds(initPwm);
+  digitalWrite(stepNo[0], LOW);
+  digitalWrite(stepNo[1], LOW);
+  return (stepPt + 1);
+}
+
+int stopWorking(int* abc){
+  *abc = *abc + 3;
+  //physical switch on proc
+  return (8);
+}
