@@ -1,0 +1,37 @@
+#include "myDev.h"
+
+#include <Servo.h>
+
+Servo myServo;
+
+myDev myDev;
+
+const uint8_t stepEna[3] = {8, 9, 10};
+const uint8_t stepDir[3] = {11, 12, 13};
+const uint8_t stepNo[3] = {14, 15, 16};
+
+const uint8_t opticalSw[4] = {40, 41, 42, 43};
+
+const uint8_t endSw[4] = {33, 34, 35, 36};
+
+uint16_t temp = 3;
+
+void setup() {
+  Serial.begin(115200);
+  myDev.registerPinEna(stepEna[0], stepEna[1], stepEna[2]);
+  myDev.registerPinDir(stepDir[0], stepDir[1], stepDir[2]);
+  myDev.registerPinStep(stepNo[0], stepNo[1], stepNo[2]);
+  myDev.registerEndSw(endSw[0], endSw[1], endSw[2], endSw[3]);
+}
+
+void loop() {
+  //myDev.homeAll();
+  delay(100);
+  Serial.println (temp/2);
+}
+
+uint16_t testtemp() {
+  temp = (temp - 1);
+  Serial.println(temp);
+  return temp;
+}
