@@ -2,7 +2,9 @@
 
 #include <Servo.h>
 
-Servo myServo;
+#define inCharConverter (inChar - 32)
+
+Servo shouldeServo, elbowServo, wristServo, elbowRoll, handServo;
 
 myDev myDev;
 
@@ -14,7 +16,11 @@ const uint8_t opticalSw[4] = {40, 41, 42, 43};
 
 const uint8_t endSw[4] = {33, 34, 35, 36};
 
-uint16_t temp = 3;
+uint8_t inAscii;
+
+int test = 3;
+
+char inChar;
 
 void setup() {
   Serial.begin(115200);
@@ -22,16 +28,31 @@ void setup() {
   myDev.registerPinDir(stepDir[0], stepDir[1], stepDir[2]);
   myDev.registerPinStep(stepNo[0], stepNo[1], stepNo[2]);
   myDev.registerEndSw(endSw[0], endSw[1], endSw[2], endSw[3]);
+
+  shouldeServo.attach(34);
+  elbowServo.attach(35);
+  wristServo.attach(36);
+  elbowRoll.attach(37);
+  handServo.attach(38);
 }
 
 void loop() {
   //myDev.homeAll();
-  delay(100);
-  Serial.println (temp/2);
+  if (Serial.available()) {
+    inChar = Serial.read();
+    inAscii = inCharConverter;
+    if (inAscii >= 0 && inAscii <= 94) {
+      if (inAscii >= 1 && inAscii <= 2) {
+        myDev.asciiGet(inCharConverter);
+      }
+    }
+  }
 }
 
-uint16_t testtemp() {
-  temp = (temp - 1);
-  Serial.println(temp);
-  return temp;
+void servoWorker() {
+  shouldeServo.writeMicroseconds(700);
+  elbowServo.writeMicroseconds(700);
+  wristServo.writeMicroseconds(700);
+  elbowRoll.writeMicroseconds(700);
+  handServo.writeMicroseconds(700);  
 }
