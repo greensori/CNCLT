@@ -10,7 +10,7 @@ myDev::~myDev()
 {
 }
 
-uint8_t myDev::asciiGet(char inChar) {
+uint8_t myDev::asciiGet(uint8_t inChar) {
   Serial.println (inChar);
 }
 
@@ -37,8 +37,11 @@ void myDev::registerPinStep(uint8_t xAxis1, uint8_t xAxis2, uint8_t rAxis) {
   xAxis[1] = xAxis2;
   this->rAxis = rAxis;
   pinMode(xAxis[0], OUTPUT);
-  pinMode(xAxis[0], OUTPUT);
+  pinMode(xAxis[1], OUTPUT);
   pinMode(rAxis, OUTPUT);
+  digitalWrite(xAxis[0], HIGH);
+  digitalWrite(xAxis[1], HIGH);
+  digitalWrite(rAxis, HIGH);
 }
 
 void myDev::registerEndSw(uint8_t xAxisStartPin, uint8_t xAxisEndPin, uint8_t rAxisStartPin, uint8_t rAxisEndPin) {
@@ -52,11 +55,11 @@ void myDev::registerEndSw(uint8_t xAxisStartPin, uint8_t xAxisEndPin, uint8_t rA
 //return potitionValue
 uint16_t myDev::xAxisMovement() {
   if (digitalRead(xAxisStartPin) == 0) {
-    digitalWrite(xAxis[0], HIGH);
-    digitalWrite(xAxis[1], HIGH);
-    delayMicroseconds(stepPwm[0]);
     digitalWrite(xAxis[0], LOW);
     digitalWrite(xAxis[1], LOW);
+    //delayMicroseconds(stepPwm[0]);
+    digitalWrite(xAxis[0], HIGH);
+    digitalWrite(xAxis[1], HIGH);
     pts[0]++;
     return pts[0];   
   } else {
@@ -67,9 +70,9 @@ uint16_t myDev::xAxisMovement() {
 
 uint16_t myDev::rAxisMovement() {
   if (digitalRead(rAxisStartPin) == 0) {
-    digitalWrite(rAxis, HIGH);
-    delayMicroseconds(stepPwm[1]);
     digitalWrite(rAxis, LOW);
+    //delayMicroseconds(stepPwm[1]);
+    digitalWrite(rAxis, HIGH);
   } else {
     pts[1] = 0;
     return pts[1];
@@ -94,23 +97,50 @@ void myDev::setDirection(uint8_t targetStep, uint8_t setDir) {
   }
 }
 
-void myDev::homeAll() {
+void myDev::xAxisHome() {
   setDirection(1, 0);
   do {
+    delayMicroseconds(900);
     xAxisMovement();
   } while(pts[0] != 0);
   setDirection(1, 1);
-  stepPwm[0] = (stepPwm[0] * 2);
+  //stepPwm[0] = (stepPwm[0] * 2);
   for (i = 0; i < 10; i++) {
+    delayMicroseconds(1800);
     xAxisMovement();
     //this phase pwm must half values
   }
-  stepPwm[0] = (stepPwm[0] / 2);
   setDirection(1, 0);
   do {
+    delayMicroseconds(900);
     xAxisMovement();
   } while(pts[0] != 0); //end xAixs home position
-  setDirection(2, 0);
+  //stepPwm[0] = (stepPwm[0] / 2); //xAxis speed normalize
 }
 
 
+void myDev::rAxisHome() {
+  setDirection(2, 0);
+  do {
+    delayMicroseconds(900);
+    rAxisMovement();
+  } while(pts[1] != 0);
+  setDirection(2, 1);
+  //stepPwm[1] = (stepPwm[1] * 2);
+  for (i = 0; i < 10; i++) {
+    delayMicroseconds(1800);
+    rAxisMovement();
+    //this phase pwm must half values
+  }
+  setDirection(2, 0);
+  do {
+    delayMicroseconds(900);
+    rAxisMovement();
+  } while(pts[1] != 0); //end xAixs home position
+  //stepPwm[1] = (stepPwm[1] / 2); //xAxis speed normalize  
+}
+
+void myDev::homeAll() {
+  xAxisHome();
+  rAxisHome();
+}
