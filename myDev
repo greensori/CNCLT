@@ -1,18 +1,25 @@
 #include "myDev.h"
 
-#include <Servo.h>
+#include "myAscii.h"
+
+//#include <Servo.h>
 
 #define inCharConverter (Serial.read() - 32)
+
+#define inCharToPwm (inChar - 96)
 
 #define servoNumber 5
 
 #define total 7
 
-Servo shouldeServo, elbowServo, wristServo, elbowRoll, handServo;
+//Servo shouldeServo, elbowServo, wristServo, elbowRoll, handServo;
 
 myDev myDev;
 
+myAscii myAscii2;
+
 struct axisStat{
+  uint16_t digit[3];
   uint16_t inPwm[total];
   uint16_t remainPwm[total];
   int8_t pwmMovement[total]; //
@@ -20,6 +27,22 @@ struct axisStat{
 }; //servos pwm is cannot exceed specific value
 
 struct axisStat Stat;
+
+struct pwm{
+  uint16_t digit[3];
+  uint16_t remain;
+  uint16_t in; // this value is sum of pwm.digit 1 to 3
+};
+
+struct pts{
+  uint16_t target;
+  uint16_t pt;
+  uint8_t stepCount;
+};
+
+
+struct pwm pwm[total];
+struct pts pts[total];
 
 uint16_t minPwm;
 
@@ -37,21 +60,27 @@ uint8_t fibbo[10] = {1, 2, 3, 5, 8, 13, 21, 34, 56, 89};
 
 int i;
 
-uint8_t inChar;
+char inChar;
 uint8_t currentPin;
 
 void setup() {
   Serial.begin(115200);
-  myDev.registerPinEna(8, 9, 10);
-  myDev.registerPinDir(11, 12, 13);
-  myDev.registerPinStep(14, 15, 16);
-  myDev.registerEndSw(22, 23, 24, 25);
-
-  shouldeServo.attach(34);
-  elbowServo.attach(35);
-  wristServo.attach(36);
-  elbowRoll.attach(37);
-  handServo.attach(38);
+  
+  #ifdef myDev_h
+    myDev.registerPinEna(8, 9, 10);
+    myDev.registerPinDir(11, 12, 13);
+    myDev.registerPinStep(14, 15, 16);
+    myDev.registerEndSw(22, 23, 24, 25);
+  #endif
+/*
+  #ifndef Servo_h
+    shouldeServo.attach(34);
+    elbowServo.attach(35);
+    wristServo.attach(36);
+    elbowRoll.attach(37);
+    handServo.attach(38);
+  #endif
+  */
 }
 
 //234 = end of char
@@ -63,19 +92,29 @@ void setup() {
 *  6. minimum movement is 800 microseconds
 */
 void loop() {
+  //myDev.asciiGet(8);
   //myDev.homeAll();
   if (Serial.available()) {
-    inChar = inCharConverter;
-    //Serial.println (inChar);
-    if (inChar >= 0 && inChar <= 94) {
-      if (inChar >= 1 && inChar <= 7) {
-        currentPin = inChar;
-      } else if (inChar == 8 || inChar == 9) {
-        
-      } else if (inChar == 94) {
-        Stat.pwmMovement[currentPin] = 2;
-      }
-    } //if end
+    inChar = Serial.read();
+    settingProc();
+  }
+}
+
+void settingProc() {
+  //inChar = inCharConverter;
+  //Serial.println (inChar);
+  if (inChar >= 97 && inChar <= 125) {
+    pwm[currentPin].in = myAscii2.asciiToPwm(inChar, &pwm[currentPin].digit[0], &pwm[currentPin].digit[1], &pwm[currentPin].digit[2]);
+    Serial.print("current Pwm_");
+    Serial.println(pwm[currentPin].in);
+    Serial.print("seperate Pwm_");
+    Serial.print(pwm[currentPin].digit[0]);
+    Serial.print(pwm[currentPin].digit[1]);
+    Serial.println(pwm[currentPin].digit[2]);    
+  } else if (inChar >= 33 && inChar <= 40) {
+    currentPin = (inChar - 33);
+    Serial.print ("set Current Pin_");
+    Serial.println (currentPin);
   }
 }
 
@@ -94,13 +133,15 @@ uint16_t findMinPwm() {
     if (Stat.remainPwm[i] == 0) {
       Stat.remainPwm[i] = Stat.inPwm[i];
       Stat.pt[i] = (Stat.pt[i] + Stat.pwmMovement[i]); //pt rearrange
-      worker(i);
+      //worker(i);
     }
   }
   return minPwm; //using for delaymicroseconds
 }
 
 
+
+/*
 void worker(int i) {
   if (i == 5) {
     myDev.xAxisMovement();
@@ -118,3 +159,4 @@ void worker(int i) {
     handServo.writeMicroseconds(Stat.pt[4]);
   }
 }
+*/
