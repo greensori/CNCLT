@@ -112,7 +112,7 @@ void settingProc() {
 }
 
 //this proc must changing stepCount and pt values
-void finalWorker() {
+void Worker(int i) {
 }
 
 
@@ -127,6 +127,7 @@ uint16_t findMinPwm() {
     if (pwm[i].remain == 0) {
       pwm[i].remain = pwm[i].in;
       pts[i].pt = (pts[i].pt + pts[i].stepCount); //pt rearrange
+      Worker(i);
       //worker(i);
     }
   }
