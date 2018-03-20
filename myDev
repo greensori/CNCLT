@@ -4,9 +4,7 @@
 
 //#include <Servo.h>
 
-#define inCharConverter (Serial.read() - 32)
-
-#define inCharToPwm (inChar - 96)
+//#define inCharConverter (Serial.read() - 32)
 
 #define servoNumber 5
 
@@ -18,16 +16,6 @@ myDev myDev;
 
 myAscii myAscii2;
 
-struct axisStat{
-  uint16_t digit[3];
-  uint16_t inPwm[total];
-  uint16_t remainPwm[total];
-  int8_t pwmMovement[total]; //
-  uint16_t pt[total]; //ds3218 is range 600 to 2400
-}; //servos pwm is cannot exceed specific value
-
-struct axisStat Stat;
-
 struct pwm{
   uint16_t digit[3];
   uint16_t remain;
@@ -37,6 +25,7 @@ struct pwm{
 struct pts{
   uint16_t target;
   uint16_t pt;
+  uint8_t dir;
   uint8_t stepCount;
 };
 
@@ -46,15 +35,7 @@ struct pts pts[total];
 
 uint16_t minPwm;
 
-/*
-const uint8_t stepEna[3] = {8, 9, 10};
-const uint8_t stepDir[3] = {11, 12, 13};
-const uint8_t stepNo[3] = {14, 15, 16};
-
-const uint8_t opticalSw[4] = {40, 41, 42, 43};
-
-const uint8_t endSw[4] = {33, 34, 35, 36};
-*/
+uint32_t ptsSum; //429496729
 
 uint8_t fibbo[10] = {1, 2, 3, 5, 8, 13, 21, 34, 56, 89};
 
@@ -89,11 +70,14 @@ void setup() {
 * 3. setiing direcction. this will set negative or positive position
 * 4. if direction is negative then stat.pwmmovement has negative value
 * 5. seperate device moving every 0.025seconds
-*  6. minimum movement is 800 microseconds
+* 6. minimum movement is 800 microseconds
 */
 void loop() {
   //myDev.asciiGet(8);
   //myDev.homeAll();
+  ptsSum = -100;
+  Serial.println (ptsSum);
+  Serial.println (ptsSum);
   if (Serial.available()) {
     inChar = Serial.read();
     settingProc();
@@ -106,40 +90,56 @@ void settingProc() {
   if (inChar >= 97 && inChar <= 125) {
     pwm[currentPin].in = myAscii2.asciiToPwm(inChar, &pwm[currentPin].digit[0], &pwm[currentPin].digit[1], &pwm[currentPin].digit[2]);
     Serial.print("current Pwm_");
-    Serial.println(pwm[currentPin].in);
-    Serial.print("seperate Pwm_");
-    Serial.print(pwm[currentPin].digit[0]);
-    Serial.print(pwm[currentPin].digit[1]);
-    Serial.println(pwm[currentPin].digit[2]);    
-  } else if (inChar >= 33 && inChar <= 40) {
+    Serial.println(pwm[currentPin].in);  
+  } else if (inChar >= 33 && inChar <= 39) { // setting 7 pin setting number
     currentPin = (inChar - 33);
     Serial.print ("set Current Pin_");
     Serial.println (currentPin);
+  } else if (inChar >= 40 && inChar <= 41) { // setiing position Values, 0is negative 1 is positive
+    pts[currentPin].dir = (inChar - 40);
+    if (currentPin == 0) {
+      myDev.setDirection(1, 0);
+    } else if (currentPin == 1) {
+      myDev.setDirection(2, 0);
+    } else if (currentPin > 1) {   
+      
+    } else {
+      
+    }
+  } else if (inChar == 32) {
+    //myDev.homeAll(); // not setting this proc yet there is no digital input
   }
 }
 
+//this proc must changing stepCount and pt values
 void finalWorker() {
-  delayMicroseconds(findMinPwm());
 }
 
 
 uint16_t findMinPwm() {
-  minPwm = Stat.remainPwm[0];
+  minPwm = pwm[0].remain;
   for (i = 1; i < total; i++) {
-    minPwm = min(minPwm, Stat.remainPwm[i]);
+    minPwm = min(minPwm, pwm[i].remain);
   }
+  delayMicroseconds(minPwm);
   for (i = 0; i < total; i++) {
-    Stat.remainPwm[i] -= minPwm;
-    if (Stat.remainPwm[i] == 0) {
-      Stat.remainPwm[i] = Stat.inPwm[i];
-      Stat.pt[i] = (Stat.pt[i] + Stat.pwmMovement[i]); //pt rearrange
+    pwm[i].remain -= minPwm;
+    if (pwm[i].remain == 0) {
+      pwm[i].remain = pwm[i].in;
+      pts[i].pt = (pts[i].pt + pts[i].stepCount); //pt rearrange
       //worker(i);
     }
   }
   return minPwm; //using for delaymicroseconds
 }
 
-
+uint32_t ptsRemain() {
+  ptsSum = 0;
+  for (i = 0; i < total; i++) {
+    ptsSum += 1;
+  }
+  return ptsSum;
+}
 
 /*
 void worker(int i) {
