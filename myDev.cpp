@@ -1,6 +1,15 @@
 #include "Arduino.h"
 #include "myDev.h"
 
+#include "myAscii.h"
+
+#include <Servo.h>
+
+
+Servo shouldeServo, elbowServo, wristServo, elbowRoll, handServo;
+
+myAscii myAscii;
+
 
 myDev::myDev() 
 {
@@ -12,6 +21,7 @@ myDev::~myDev()
 
 uint8_t myDev::asciiGet(uint8_t inChar) {
   Serial.println (inChar);
+  myAscii.test();
 }
 
 void myDev::registerPinEna(uint8_t xAxisEna1, uint8_t xAxisEna2, uint8_t rAxisEna) {
@@ -43,6 +53,16 @@ void myDev::registerPinStep(uint8_t xAxis1, uint8_t xAxis2, uint8_t rAxis) {
   digitalWrite(xAxis[1], HIGH);
   digitalWrite(rAxis, HIGH);
 }
+
+void myDev::registerServo(uint8_t sv1, uint8_t sv2, uint8_t sv3, uint8_t sv4, uint8_t sv5) {
+  shouldeServo.attach(sv1);
+  elbowServo.attach(sv2);
+  wristServo.attach(sv3);
+  elbowRoll.attach(sv4);
+  handServo.attach(sv5);
+}
+
+
 
 void myDev::registerEndSw(uint8_t xAxisStartPin, uint8_t xAxisEndPin, uint8_t rAxisStartPin, uint8_t rAxisEndPin) {
     this->xAxisStartPin = xAxisStartPin;
@@ -79,8 +99,22 @@ uint16_t myDev::rAxisMovement() {
   }
 }
 
+void myDev::servoMovement(uint8_t servoNum, uint16_t pt) {
+  if (servoNum == 2) {
+    shouldeServo.writeMicroseconds(pt); 
+  } else if (servoNum == 3) {
+    elbowServo.writeMicroseconds(pt);
+  } else if (servoNum == 4) {
+    wristServo.writeMicroseconds(pt);
+  } else if (servoNum == 5) {
+    elbowRoll.writeMicroseconds(pt);
+  } else if (servoNum == 6) {
+    handServo.writeMicroseconds(pt); 
+  }
+}
+
 void myDev::setDirection(uint8_t targetStep, uint8_t setDir) {
-  if (targetStep == 1) {
+  if (targetStep == 0) {
     if (setDir == 0) {
       digitalWrite(xAxisDir[0], HIGH);
       digitalWrite(xAxisDir[1], HIGH);
@@ -88,7 +122,7 @@ void myDev::setDirection(uint8_t targetStep, uint8_t setDir) {
       digitalWrite(xAxisDir[0], LOW);
       digitalWrite(xAxisDir[1], LOW);      
     }
-  } else if (targetStep == 2) {
+  } else if (targetStep == 1) {
     if (setDir == 0) {
       digitalWrite(xAxisDir[1], HIGH);
     } else if (setDir == 1) {
