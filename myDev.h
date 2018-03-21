@@ -3,6 +3,8 @@
 
 #include "Arduino.h"
 
+//#include "myAscii.h"
+
 class myDev
 {
   private:
@@ -27,9 +29,11 @@ class myDev
     void registerPinDir(uint8_t xAxisDir1, uint8_t xAxisDir2, uint8_t rAxisDir);
     void registerPinStep(uint8_t xAxis1, uint8_t xAxis2, uint8_t rAxis);
     void registerEndSw(uint8_t xAxisStart, uint8_t xAxisEnd, uint8_t rAxisStart, uint8_t rAxisEnd);
+    void registerServo(uint8_t sv1, uint8_t sv2, uint8_t sv3, uint8_t sv4, uint8_t sv5);
     int setOptical(int s1, int s2, int s3, int s4); //return present optical value
     uint16_t xAxisMovement();
     uint16_t rAxisMovement();
+    void servoMovement(uint8_t servoNum, uint16_t pt);
     void setDirection(uint8_t targetStep, uint8_t setDir);
     void xAxisHome();
     void rAxisHome();
