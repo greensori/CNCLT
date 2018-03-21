@@ -52,6 +52,7 @@ void setup() {
     myDev.registerPinDir(11, 12, 13);
     myDev.registerPinStep(14, 15, 16);
     myDev.registerEndSw(22, 23, 24, 25);
+    myDev.registerServo(33, 34, 35, 36, 37);
   #endif
 /*
   #ifndef Servo_h
@@ -75,9 +76,6 @@ void setup() {
 void loop() {
   //myDev.asciiGet(8);
   //myDev.homeAll();
-  ptsSum = -100;
-  Serial.println (ptsSum);
-  Serial.println (ptsSum);
   if (Serial.available()) {
     inChar = Serial.read();
     settingProc();
@@ -98,23 +96,40 @@ void settingProc() {
   } else if (inChar >= 40 && inChar <= 41) { // setiing position Values, 0is negative 1 is positive
     pts[currentPin].dir = (inChar - 40);
     if (currentPin == 0) {
-      myDev.setDirection(1, 0);
+      myDev.setDirection(0, pts[currentPin].dir);
     } else if (currentPin == 1) {
-      myDev.setDirection(2, 0);
-    } else if (currentPin > 1) {   
-      
-    } else {
-      
+      myDev.setDirection(1, pts[currentPin].dir);
     }
   } else if (inChar == 32) {
     //myDev.homeAll(); // not setting this proc yet there is no digital input
   }
 }
 
+
+
 //this proc must changing stepCount and pt values
-void Worker(int i) {
+uint16_t servoWorker(int i) {
+  if (pts[i].target < pts[i].pt) {
+    pts[i].pt += pts[i].stepCount;
+    return pts[i].pt;
+  } else if(pts[i].target > pts[i].pt) {
+    pts[i].pt -= pts[i].stepCount;
+    return pts[i].pt;
+  }
 }
 
+uint8_t stepWorker(int i) {
+  if (pts[i].target < pts[i].pt) {
+    pts[i].pt += pts[i].stepCount;
+    if (pts[i].dir == 0) {
+      
+    }
+    return 0;
+  } else if(pts[i].target > pts[i].pt) {
+    pts[i].pt -= pts[i].stepCount;
+    return 1;
+  }  
+}
 
 uint16_t findMinPwm() {
   minPwm = pwm[0].remain;
@@ -126,9 +141,12 @@ uint16_t findMinPwm() {
     pwm[i].remain -= minPwm;
     if (pwm[i].remain == 0) {
       pwm[i].remain = pwm[i].in;
-      pts[i].pt = (pts[i].pt + pts[i].stepCount); //pt rearrange
-      Worker(i);
-      //worker(i);
+      if (i == 0) {
+        //stepwork
+      } else if (i == 1) {
+      } else if (i > 2) {
+        myDev.servoMovement(i, servoWorker(i));
+      }
     }
   }
   return minPwm; //using for delaymicroseconds
