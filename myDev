@@ -42,6 +42,9 @@ uint8_t fibbo[10] = {1, 2, 3, 5, 8, 13, 21, 34, 56, 89};
 int i;
 
 char inChar;
+
+uint8_t inNum;
+
 uint8_t currentPin;
 
 void setup() {
@@ -78,8 +81,16 @@ void loop() {
   //myDev.homeAll();
   if (Serial.available()) {
     inChar = Serial.read();
-    settingProc();
+    myAscii2.input(inChar);
+    //inNum = inChar;
+    //settingProc();
+  } else if (!Serial.available()) {
+    myAscii2.nosignal();
+    delay(1000);
   }
+  //delay(1000);
+  //Serial.print ("last receive_");
+  //Serial.println (inNum);
 }
 
 void settingProc() {
@@ -116,19 +127,6 @@ uint16_t servoWorker(int i) {
     pts[i].pt -= pts[i].stepCount;
     return pts[i].pt;
   }
-}
-
-uint8_t stepWorker(int i) {
-  if (pts[i].target < pts[i].pt) {
-    pts[i].pt += pts[i].stepCount;
-    if (pts[i].dir == 0) {
-      
-    }
-    return 0;
-  } else if(pts[i].target > pts[i].pt) {
-    pts[i].pt -= pts[i].stepCount;
-    return 1;
-  }  
 }
 
 uint16_t findMinPwm() {
